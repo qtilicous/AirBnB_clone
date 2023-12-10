@@ -1,15 +1,12 @@
 #!/usr/bin/python3
 """
-Console module for AirBnB clone.
+Module for HBNBCommand class.
 """
 import cmd
 from models import storage
 from models.base_model import BaseModel
-from models.state import State
-from models.city import City
-from models.amenity import Amenity
-from models.place import Place
-from models.review import Review
+from models.user import User
+import shlex
 
 
 class HBNBCommand(cmd.Cmd):
@@ -17,10 +14,7 @@ class HBNBCommand(cmd.Cmd):
     HBNBCommand class for the command interpreter.
     """
     prompt = '(hbnb) '
-
-    def emptyline(self):
-        """Do nothing on empty input line."""
-        pass
+    __classes = {"BaseModel", "User"}
 
     def do_quit(self, arg):
         """Quit command to exit the program."""
@@ -30,8 +24,12 @@ class HBNBCommand(cmd.Cmd):
         """EOF command to exit the program."""
         return True
 
+    def emptyline(self):
+        """Called when an empty line is entered."""
+        pass
+
     def do_create(self, arg):
-        """Create command to create a new instance of BaseModel."""
+        """Create command to create a new instance of BaseModel or User."""
         if not arg:
             print("** class name missing **")
             return
@@ -43,60 +41,92 @@ class HBNBCommand(cmd.Cmd):
             print("** class doesn't exist **")
 
     def do_show(self, arg):
-        """Show command to print the string representation of an instance."""
-        if not arg:
+        """Show command to display the string representation of an instance."""
+        args = shlex.split(arg)
+        if not args:
             print("** class name missing **")
             return
         try:
-            cls_name, obj_id = arg.split()
-            key = "{}.{}".format(cls_name, obj_id)
-            print(storage.all().get(key, "** no instance found **"))
-        except ValueError:
-            print("** instance id missing **")
+            cls = eval(args[0])
+            if len(args) < 2:
+                print("** instance id missing **")
+                return
+            key = "{}.{}".format(args[0], args[1])
+            if key in storage.all():
+                print(storage.all()[key])
+            else:
+                print("** no instance found **")
         except NameError:
             print("** class doesn't exist **")
 
     def do_destroy(self, arg):
-        """Destroy command to delete an instance based on the class name and id."""
-        if not arg:
+        """Destroy command to delete an instance."""
+        args = shlex.split(arg)
+        if not args:
             print("** class name missing **")
             return
         try:
-            cls_name, obj_id = arg.split()
-            key = "{}.{}".format(cls_name, obj_id)
-            storage.all().pop(key, None)
-            storage.save()
-        except ValueError:
-            print("** instance id missing **")
+            cls = eval(args[0])
+            if len(args) < 2:
+                print("** instance id missing **")
+                return
+            key = "{}.{}".format(args[0], args[1])
+            if key in storage.all():
+                del storage.all()[key]
+                storage.save()
+            else:
+                print("** no instance found **")
         except NameError:
             print("** class doesn't exist **")
 
     def do_all(self, arg):
-        """All command to print all string representation of all instances."""
-        obj_list = [str(obj) for obj in storage.all().values() if arg in str(obj)]
-        print(obj_list)
+        """All command to display all instances."""
+        args = shlex.split(arg)
+        objs = storage.all()
+        if not args:
+            print([str(objs[obj]) for obj in objs])
+        else:
+            try:
+                cls = eval(args[0])
+                print([str(objs[obj]) for obj in objs if args[0] in obj])
+            except NameError:
+                print("** class doesn't exist **")
 
     def do_update(self, arg):
-        """Update command to update an instance based on the class name and id."""
-        if not arg:
+        """Update command to update an instance."""
+        args = shlex.split(arg)
+        if not args:
             print("** class name missing **")
             return
         try:
-            args = arg.split()
-            cls_name, obj_id, attr_name = args[0], args[1], args[2]
-            key = "{}.{}".format(cls_name, obj_id)
-            obj = storage.all().get(key)
-            if obj:
-                if len(args) == 3:
-                    print("** value missing **")
-                    return
-                value = args[3]
-                setattr(obj, attr_name, value)
-                storage.save()
-            else:
+            cls = eval(args[0])
+            if len(args) < 2:
+                print("** instance id missing **")
+                return
+            key = "{}.{}".format(args[0], args[1])
+            if key not in storage.all():
                 print("** no instance found **")
-        except ValueError:
-            print("** instance id missing **")
+                return
+            if len(args) < 3:
+                print("** attribute name missing **")
+                return
+            if len(args) < 4:
+                print("** value missing **")
+                return
+            setattr(storage.all()[key], args[2], args[3])
+            storage.save()
+        except NameError:
+            print("** class doesn't exist **")
+
+    def do_count(self, arg):
+        """Count command to count instances of a class."""
+        args = shlex.split(arg)
+        if not args:
+            print("** class name missing **")
+            return
+        try:
+            cls = eval(args[0])
+            print(len([obj for obj in storage.all() if args[0] in obj]))
         except NameError:
             print("** class doesn't exist **")
 
