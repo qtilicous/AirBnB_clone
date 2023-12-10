@@ -1,71 +1,52 @@
 #!/usr/bin/python3
 """
-Module for FileStorage class
+Module for FileStorage class.
 """
-
 import json
 from models.base_model import BaseModel
-from datetime import datetime
 
 
 class FileStorage:
     """
-    Serializes instances to a JSON file and deserializes JSON file to instances
+    FileStorage class for serialization and deserialization.
     """
-
     __file_path = "file.json"
     __objects = {}
 
     def all(self):
         """
-        Returns the dictionary __objects
+        Returns the dictionary __objects.
         """
-        return self.__objects
+        return FileStorage.__objects
 
     def new(self, obj):
         """
-        Sets in __objects the obj with key <obj class name>.id
+        Sets in __objects the obj with key <obj class name>.id.
         """
         key = "{}.{}".format(obj.__class__.__name__, obj.id)
-        self.__objects[key] = obj
+        FileStorage.__objects[key] = obj
 
     def save(self):
         """
-        Serializes __objects to the JSON file (path: __file_path)
+        Serializes __objects to the JSON file (path: __file_path).
         """
-        obj_dict = {}
-        for key, obj in self.__objects.items():
-            obj_dict[key] = obj.to_dict()
-
-        with open(self.__file_path, 'w', encoding='utf-8') as file:
-            json.dump(obj_dict, file)
+        new_dict = {}
+        for key, value in FileStorage.__objects.items():
+            new_dict[key] = value.to_dict()
+        with open(FileStorage.__file_path, 'w', encoding="utf-8") as file:
+            json.dump(new_dict, file)
 
     def reload(self):
         """
-        Deserializes the JSON file to __objects
+        Deserializes the JSON file to __objects.
         """
         try:
-            with open(self.__file_path, 'r', encoding='utf-8') as file:
-                obj_dict = json.load(file)
-
-            for key, obj_data in obj_dict.items():
-                class_name, obj_id = key.split('.')
-                obj_data['created_at'] = datetime.strptime(obj_data['created_at'], '%Y-%m-%dT%H:%M:%S.%f')
-                obj_data['updated_at'] = datetime.strptime(obj_data['updated_at'], '%Y-%m-%dT%H:%M:%S.%f')
-                obj = eval(class_name)(**obj_data)
-                self.__objects[key] = obj
-
+            with open(FileStorage.__file_path, 'r', encoding="utf-8") as file:
+                dict_objs = json.load(file)
+                for key, value in dict_objs.items():
+                    cls_name, obj_id = key.split('.')
+                    cls = eval(cls_name)
+                    new_obj = cls(**value)
+                    FileStorage.__objects[key] = new_obj
         except FileNotFoundError:
             pass
-
-
-# If the script is run directly, execute the sample test
-if __name__ == "__main__":
-    storage = FileStorage()
-    storage.reload()
-
-    all_objs = storage.all()
-    print("-- Reloaded objects --")
-    for obj_id in all_objs.keys():
-        obj = all_objs[obj_id]
-        print(obj)
