@@ -1,40 +1,28 @@
 #!/usr/bin/python3
-
+"""
+Console module for the command interpreter.
+"""
 import cmd
 
+
 class HBNBCommand(cmd.Cmd):
-    """Command interpreter for AirBnB clone"""
-
-    prompt = "(hbnb) "
-
-    def do_create(self, arg):
-        """Create a new object"""
-        # Actual implementation needed
-        pass
-
-    def do_show(self, arg):
-        """Show information about a specific object"""
-        # Actual implementation needed
-        pass
-
-    def do_destroy(self, arg):
-        """Destroy a specific object"""
-        # Actual implementation needed
-        pass
-
-    def do_all(self, arg):
-        """Show information about all objects"""
-        # Actual implementation needed
-        pass
+    """
+    HBNBCommand class for the command interpreter.
+    """
+    prompt = '(hbnb) '
 
     def do_quit(self, arg):
-        """Quit the console"""
+        """
+        Quit command to exit the program.
+        """
         return True
 
     def do_EOF(self, arg):
-        """Handle end-of-file (EOF)"""
-        print()
+        """
+        EOF command to exit the program.
+        """
         return True
 
-if __name__ == "__main__":
+
+if __name__ == '__main__':
     HBNBCommand().cmdloop()
