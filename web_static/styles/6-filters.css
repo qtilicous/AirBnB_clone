@@ -1,0 +1,15 @@
+.popover {
+	display: none;
+	position: absolute;
+	background-color: #FAFAFA;
+	width: 100%;
+	border: 1px solid #DDDDDD;
+	border-radius: 4px;
+	padding: 0;
+	list-style: none;
+	box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.locations:hover .popover {
+    display: block;
+}
